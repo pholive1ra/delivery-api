@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: delivery-postgres
+    environment:
+      POSTGRES_DB: delivery_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 597381
+    ports:
+      - "5433:5432"
+    volumes:
+      - delivery_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  delivery_postgres_data:
