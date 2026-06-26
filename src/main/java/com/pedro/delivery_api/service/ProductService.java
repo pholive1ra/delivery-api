@@ -1,0 +1,68 @@
+package com.pedro.delivery_api.service;
+
+import com.pedro.delivery_api.dto.CategoryResponseDTO;
+import com.pedro.delivery_api.dto.ProductRequestDTO;
+import com.pedro.delivery_api.dto.ProductResponseDTO;
+import com.pedro.delivery_api.entity.Category;
+import com.pedro.delivery_api.entity.Product;
+import com.pedro.delivery_api.repository.CategoryRepository;
+import com.pedro.delivery_api.repository.ProductRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ProductService {
+
+    private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
+
+    public ProductService(CategoryRepository categoryRepository, ProductRepository productRepository) {
+        this.categoryRepository = categoryRepository;
+        this.productRepository = productRepository;
+    }
+
+    public ProductResponseDTO create(ProductRequestDTO request) {
+        Product product = new Product();
+        product.setName(request.name());
+        product.setDescription(request.description());
+        product.setPrice(request.price());
+        product.setAvailable(request.available());
+
+      Category category =  categoryRepository.findById(request.categoryId()).orElseThrow(() -> new RuntimeException("Categoria não encontrada."));
+      product.setCategory(category);
+      Product productSaved = productRepository.save(product);
+
+        return new ProductResponseDTO(
+                productSaved.getId(),
+                productSaved.getName(),
+                productSaved.getDescription(),
+                productSaved.getPrice(),
+                productSaved.getAvailable(),
+                new CategoryResponseDTO(
+                        productSaved.getCategory().getId(),
+                        productSaved.getCategory().getName(),
+                        productSaved.getCategory().getActive()
+                )
+        );
+    }
+        public List<ProductResponseDTO> list() {
+            List<Product> listProduct = productRepository.findAll();
+
+
+            return listProduct.stream()
+                    .map(c -> new ProductResponseDTO(
+                            c.getId(),
+                            c.getName(),
+                            c.getDescription(),
+                            c.getPrice(),
+                            c.getAvailable(),
+                            new CategoryResponseDTO(
+                                    c.getCategory().getId(),
+                                    c.getCategory().getName(),
+                                    c.getCategory().getActive()
+                            )
+                    ))
+                    .toList();
+    }
+}

@@ -1,11 +1,9 @@
 package com.pedro.delivery_api.service;
-
 import com.pedro.delivery_api.dto.CategoryRequestDTO;
 import com.pedro.delivery_api.dto.CategoryResponseDTO;
 import com.pedro.delivery_api.entity.Category;
 import com.pedro.delivery_api.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -54,5 +52,6 @@ public class CategoryService {
     public void deleteCategory(Long categoryId) {
         Category listCategoryById = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Categoria não encontrada."));
         categoryRepository.deleteById(categoryId);
+
     }
 }

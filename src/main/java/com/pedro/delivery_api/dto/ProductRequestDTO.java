@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 public record ProductRequestDTO (
         @NotNull
         Long categoryId,
-        @NotBlank
+        @NotNull
         Boolean available,
         @NotBlank
         String name,
