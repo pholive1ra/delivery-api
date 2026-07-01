@@ -10,6 +10,7 @@ import com.pedro.delivery_api.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -64,5 +65,41 @@ public class ProductService {
                             )
                     ))
                     .toList();
+    }
+
+    public ProductResponseDTO listById(Long id) {
+        Product product =  productRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrada."));
+        return new ProductResponseDTO(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getAvailable(), new CategoryResponseDTO(
+                product.getCategory().getId(),
+                product.getCategory().getName(),
+                product.getCategory().getActive()
+        ));  // category é uma entidade (Category), mas o DTO espera um CategoryResponseDTO
+            // por isso preciso converter, montando um novo CategoryResponseDTO com os dados da entidade
+    }
+
+    public ProductResponseDTO update(Long id, ProductRequestDTO request) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+        Category category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada."));
+        product.setCategory(category);
+        product.setName(request.name());
+        product.setDescription(request.description());
+        product.setPrice(request.price());
+        product.setAvailable(request.available());
+
+
+        Product savedUpdate = productRepository.save(product);
+
+        return new ProductResponseDTO(savedUpdate.getId(), savedUpdate.getName(), savedUpdate.getDescription(), savedUpdate.getPrice(), savedUpdate.getAvailable(), new CategoryResponseDTO(
+                savedUpdate.getCategory().getId(),
+                savedUpdate.getCategory().getName(),
+                savedUpdate.getCategory().getActive()
+        ));  // category é uma entidade (Category), mas o DTO espera um CategoryResponseDTO
+        // por isso preciso converter, montando um novo CategoryResponseDTO com os dados da entidade
+    }
+
+    public void delete(Long id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+        productRepository.delete(product);
     }
 }
