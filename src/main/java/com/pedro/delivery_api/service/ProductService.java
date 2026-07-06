@@ -90,7 +90,8 @@ public class ProductService {
 
         Product savedUpdate = productRepository.save(product);
 
-        return new ProductResponseDTO(savedUpdate.getId(), savedUpdate.getName(), savedUpdate.getDescription(), savedUpdate.getPrice(), savedUpdate.getAvailable(), new CategoryResponseDTO(
+        return new ProductResponseDTO(savedUpdate.getId(), savedUpdate.getName(), savedUpdate.getDescription(), savedUpdate.getPrice(), savedUpdate.getAvailable(),
+                new CategoryResponseDTO(
                 savedUpdate.getCategory().getId(),
                 savedUpdate.getCategory().getName(),
                 savedUpdate.getCategory().getActive()
