@@ -1,9 +1,6 @@
 package com.pedro.delivery_api.service;
 
-import com.pedro.delivery_api.dto.OrderItemRequestDTO;
-import com.pedro.delivery_api.dto.OrderItemResponseDTO;
-import com.pedro.delivery_api.dto.OrderRequestDTO;
-import com.pedro.delivery_api.dto.OrderResponseDTO;
+import com.pedro.delivery_api.dto.*;
 import com.pedro.delivery_api.entity.*;
 import com.pedro.delivery_api.repository.*;
 import org.springframework.stereotype.Service;
@@ -137,7 +134,36 @@ public class OrderService {
         );
     }
 
-    public OrderResponseDTO update(Long id, OrderResponseDTO request) {
+    public OrderResponseDTO update(Long id, OrderStatusUpdateDTO request) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
+        order.setOrderStatus(request.orderStatus());
 
+        Order savedOrder = orderRepository.save(order);
+
+        List<OrderItem> items = orderItemRepository.findByOrderId(id);
+
+        List<OrderItemResponseDTO> itemResponse = new ArrayList<>();
+        for(OrderItem item : items) {
+            itemResponse.add(new OrderItemResponseDTO(
+               item.getProduct().getId(),
+               item.getProduct().getName(),
+               item.getQuantity(),
+               item.getUnitPrice()
+            ));
+        }
+        return new OrderResponseDTO(
+                savedOrder.getId(),
+                savedOrder.getCustomer().getId(),
+                savedOrder.getAddress().getId(),
+                itemResponse,
+                savedOrder.getTotalPrice(),
+                savedOrder.getOrderStatus(),
+                savedOrder.getCreatedAt()
+        );
+    }
+
+    public void delete(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
+        orderRepository.delete(order);
     }
 }

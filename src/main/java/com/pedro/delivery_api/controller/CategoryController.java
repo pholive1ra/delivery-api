@@ -3,6 +3,7 @@ package com.pedro.delivery_api.controller;
 import com.pedro.delivery_api.dto.CategoryRequestDTO;
 import com.pedro.delivery_api.dto.CategoryResponseDTO;
 import com.pedro.delivery_api.service.CategoryService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,8 +39,9 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         categoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
     }
 }
 

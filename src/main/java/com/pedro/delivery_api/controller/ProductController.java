@@ -3,6 +3,7 @@ package com.pedro.delivery_api.controller;
 import com.pedro.delivery_api.dto.ProductRequestDTO;
 import com.pedro.delivery_api.dto.ProductResponseDTO;
 import com.pedro.delivery_api.service.ProductService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,7 +39,8 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
