@@ -29,6 +29,7 @@ public class ProductService {
         product.setDescription(request.description());
         product.setPrice(request.price());
         product.setAvailable(request.available());
+        product.setStockQuantity(request.stockQuantity());
 
       Category category =  categoryRepository.findById(request.categoryId()).orElseThrow(() -> new RuntimeException("Categoria não encontrada."));
       product.setCategory(category);
@@ -39,6 +40,7 @@ public class ProductService {
                 productSaved.getName(),
                 productSaved.getDescription(),
                 productSaved.getPrice(),
+                productSaved.getStockQuantity(),
                 productSaved.getAvailable(),
                 new CategoryResponseDTO(
                         productSaved.getCategory().getId(),
@@ -57,6 +59,7 @@ public class ProductService {
                             c.getName(),
                             c.getDescription(),
                             c.getPrice(),
+                            c.getStockQuantity(),
                             c.getAvailable(),
                             new CategoryResponseDTO(
                                     c.getCategory().getId(),
@@ -69,7 +72,14 @@ public class ProductService {
 
     public ProductResponseDTO listById(Long id) {
         Product product =  productRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrada."));
-        return new ProductResponseDTO(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getAvailable(), new CategoryResponseDTO(
+        return new ProductResponseDTO(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStockQuantity(),
+                product.getAvailable(),
+                new CategoryResponseDTO(
                 product.getCategory().getId(),
                 product.getCategory().getName(),
                 product.getCategory().getActive()
@@ -85,12 +95,19 @@ public class ProductService {
         product.setName(request.name());
         product.setDescription(request.description());
         product.setPrice(request.price());
+        product.setStockQuantity(request.stockQuantity());
         product.setAvailable(request.available());
 
 
         Product savedUpdate = productRepository.save(product);
 
-        return new ProductResponseDTO(savedUpdate.getId(), savedUpdate.getName(), savedUpdate.getDescription(), savedUpdate.getPrice(), savedUpdate.getAvailable(),
+        return new ProductResponseDTO(
+                savedUpdate.getId(),
+                savedUpdate.getName(),
+                savedUpdate.getDescription(),
+                savedUpdate.getPrice(),
+                savedUpdate.getStockQuantity(),
+                savedUpdate.getAvailable(),
                 new CategoryResponseDTO(
                 savedUpdate.getCategory().getId(),
                 savedUpdate.getCategory().getName(),

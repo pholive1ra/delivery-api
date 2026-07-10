@@ -31,20 +31,42 @@ public class OrderService {
         Address address = addressRepository.findById(request.addressId()).orElseThrow(() -> new RuntimeException("Endereço não identificado."));
         Customer customer = customerRepository.findById(request.customerId()).orElseThrow(() -> new RuntimeException("Cliente não identificado."));
 
+        // 1ª passada: validar disponibilidade/estoque e calcular o total, sem salvar nada ainda
+        BigDecimal totalPrice = BigDecimal.ZERO;
+
+        for (OrderItemRequestDTO itemRequest : request.items()) {
+            Product product = productRepository.findById(itemRequest.productId()).orElseThrow(() -> new RuntimeException("Produto não encontrado."));
+
+            if (!product.getAvailable()) {
+                throw new RuntimeException("Produto indisponível: " + product.getName());
+            }
+
+            if (itemRequest.quantity() > product.getStockQuantity()) {
+                throw new RuntimeException("Produto esgotado.");
+            }
+
+            BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(itemRequest.quantity()));
+            totalPrice = totalPrice.add(itemTotal);
+        }
+
+        // Agora que passou por todas as validações, cria e salva o Order já completo
         Order order = new Order();
         order.setCustomer(customer);
         order.setAddress(address);
         order.setOrderStatus(OrderStatus.RECEIVED);
         order.setCreatedAt(LocalDateTime.now());
+        order.setTotalPrice(totalPrice);
 
         Order savedOrder = orderRepository.save(order);
 
-        BigDecimal totalPrice = BigDecimal.ZERO;
-
+        // 2ª passada: agora cria os OrderItem, desconta o estoque e monta a resposta
         List<OrderItemResponseDTO> itemResponse = new ArrayList<>();
 
         for (OrderItemRequestDTO itemRequest : request.items()) {
             Product product = productRepository.findById(itemRequest.productId()).orElseThrow(() -> new RuntimeException("Produto não encontrado."));
+
+            product.setStockQuantity(product.getStockQuantity() - itemRequest.quantity());
+            productRepository.save(product);
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(savedOrder);
@@ -60,14 +82,7 @@ public class OrderService {
                     itemRequest.quantity(),
                     product.getPrice()
             ));
-
-            BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(itemRequest.quantity()));
-            totalPrice = totalPrice.add(itemTotal);
-
         }
-
-        savedOrder.setTotalPrice(totalPrice);
-        orderRepository.save(savedOrder);
 
         return new OrderResponseDTO(
                 savedOrder.getId(),
@@ -143,12 +158,12 @@ public class OrderService {
         List<OrderItem> items = orderItemRepository.findByOrderId(id);
 
         List<OrderItemResponseDTO> itemResponse = new ArrayList<>();
-        for(OrderItem item : items) {
+        for (OrderItem item : items) {
             itemResponse.add(new OrderItemResponseDTO(
-               item.getProduct().getId(),
-               item.getProduct().getName(),
-               item.getQuantity(),
-               item.getUnitPrice()
+                    item.getProduct().getId(),
+                    item.getProduct().getName(),
+                    item.getQuantity(),
+                    item.getUnitPrice()
             ));
         }
         return new OrderResponseDTO(
