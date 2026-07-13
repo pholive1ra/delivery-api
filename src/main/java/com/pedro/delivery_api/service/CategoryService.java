@@ -2,6 +2,7 @@ package com.pedro.delivery_api.service;
 import com.pedro.delivery_api.dto.CategoryRequestDTO;
 import com.pedro.delivery_api.dto.CategoryResponseDTO;
 import com.pedro.delivery_api.entity.Category;
+import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -35,13 +36,13 @@ public class CategoryService {
     }
 
     public CategoryResponseDTO listById(Long id){
-    Category listCategoryById = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Categoria não encontrada."));
+    Category listCategoryById = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
 
         return new CategoryResponseDTO(listCategoryById.getId(), listCategoryById.getName(), listCategoryById.getActive());
     }
 
     public CategoryResponseDTO updateCategory(Long categoryId, CategoryRequestDTO request) {
-        Category listCategoryById = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Categoria não encontrada."));
+        Category listCategoryById = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
             listCategoryById.setName(request.name());
 
             Category savedCategoryUpdated = categoryRepository.save(listCategoryById);
@@ -50,7 +51,7 @@ public class CategoryService {
     }
 
     public void deleteCategory(Long categoryId) {
-        Category listCategoryById = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Categoria não encontrada."));
+        Category listCategoryById = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
         categoryRepository.deleteById(categoryId);
 
     }

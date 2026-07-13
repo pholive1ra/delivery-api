@@ -5,6 +5,7 @@ import com.pedro.delivery_api.dto.ProductRequestDTO;
 import com.pedro.delivery_api.dto.ProductResponseDTO;
 import com.pedro.delivery_api.entity.Category;
 import com.pedro.delivery_api.entity.Product;
+import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.CategoryRepository;
 import com.pedro.delivery_api.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class ProductService {
         product.setAvailable(request.available());
         product.setStockQuantity(request.stockQuantity());
 
-      Category category =  categoryRepository.findById(request.categoryId()).orElseThrow(() -> new RuntimeException("Categoria não encontrada."));
+      Category category =  categoryRepository.findById(request.categoryId()).orElseThrow(() ->new ResourceNotFoundException("Categoria não encontrada."));
       product.setCategory(category);
       Product productSaved = productRepository.save(product);
 
@@ -71,7 +72,7 @@ public class ProductService {
     }
 
     public ProductResponseDTO listById(Long id) {
-        Product product =  productRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrada."));
+        Product product =  productRepository.findById(id).orElseThrow(() ->new ResourceNotFoundException("Produto não encontrada."));
         return new ProductResponseDTO(
                 product.getId(),
                 product.getName(),
@@ -88,9 +89,9 @@ public class ProductService {
     }
 
     public ProductResponseDTO update(Long id, ProductRequestDTO request) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
         Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada."));
+                .orElseThrow(() ->new ResourceNotFoundException("Categoria não encontrada."));
         product.setCategory(category);
         product.setName(request.name());
         product.setDescription(request.description());
@@ -117,7 +118,7 @@ public class ProductService {
     }
 
     public void delete(Long id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
         productRepository.delete(product);
     }
 }

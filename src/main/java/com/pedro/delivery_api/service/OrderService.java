@@ -2,6 +2,7 @@ package com.pedro.delivery_api.service;
 
 import com.pedro.delivery_api.dto.*;
 import com.pedro.delivery_api.entity.*;
+import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.*;
 import org.springframework.stereotype.Service;
 
@@ -28,21 +29,21 @@ public class OrderService {
     }
 
     public OrderResponseDTO create(OrderRequestDTO request) {
-        Address address = addressRepository.findById(request.addressId()).orElseThrow(() -> new RuntimeException("Endereço não identificado."));
-        Customer customer = customerRepository.findById(request.customerId()).orElseThrow(() -> new RuntimeException("Cliente não identificado."));
+        Address address = addressRepository.findById(request.addressId()).orElseThrow(() ->new ResourceNotFoundException("Endereço não identificado."));
+        Customer customer = customerRepository.findById(request.customerId()).orElseThrow(() -> new ResourceNotFoundException("Cliente não identificado."));
 
         // 1ª passada: validar disponibilidade/estoque e calcular o total, sem salvar nada ainda
         BigDecimal totalPrice = BigDecimal.ZERO;
 
         for (OrderItemRequestDTO itemRequest : request.items()) {
-            Product product = productRepository.findById(itemRequest.productId()).orElseThrow(() -> new RuntimeException("Produto não encontrado."));
+            Product product = productRepository.findById(itemRequest.productId()).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado."));
 
             if (!product.getAvailable()) {
-                throw new RuntimeException("Produto indisponível: " + product.getName());
+                throw new ResourceNotFoundException("Produto indisponível: " + product.getName());
             }
 
             if (itemRequest.quantity() > product.getStockQuantity()) {
-                throw new RuntimeException("Produto esgotado.");
+                throw new ResourceNotFoundException("Produto esgotado.");
             }
 
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(itemRequest.quantity()));
@@ -63,7 +64,7 @@ public class OrderService {
         List<OrderItemResponseDTO> itemResponse = new ArrayList<>();
 
         for (OrderItemRequestDTO itemRequest : request.items()) {
-            Product product = productRepository.findById(itemRequest.productId()).orElseThrow(() -> new RuntimeException("Produto não encontrado."));
+            Product product = productRepository.findById(itemRequest.productId()).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado."));
 
             product.setStockQuantity(product.getStockQuantity() - itemRequest.quantity());
             productRepository.save(product);
@@ -125,7 +126,7 @@ public class OrderService {
     }
 
     public OrderResponseDTO listById(Long id) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
+        Order order = orderRepository.findById(id).orElseThrow(() ->new ResourceNotFoundException("Pedido não encontrado."));
         List<OrderItem> items = orderItemRepository.findByOrderId(id);
 
         List<OrderItemResponseDTO> itemResponse = new ArrayList<>();
@@ -150,7 +151,7 @@ public class OrderService {
     }
 
     public OrderResponseDTO update(Long id, OrderStatusUpdateDTO request) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
+        Order order = orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado."));
         order.setOrderStatus(request.orderStatus());
 
         Order savedOrder = orderRepository.save(order);
@@ -178,7 +179,7 @@ public class OrderService {
     }
 
     public void delete(Long id) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
+        Order order = orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado."));
         orderRepository.delete(order);
     }
 }

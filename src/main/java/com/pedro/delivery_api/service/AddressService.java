@@ -3,6 +3,7 @@ import com.pedro.delivery_api.dto.AddressRequestDTO;
 import com.pedro.delivery_api.dto.AddressResponseDTO;
 import com.pedro.delivery_api.entity.Address;
 import com.pedro.delivery_api.entity.Customer;
+import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.AddressRepository;
 import com.pedro.delivery_api.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class AddressService {
 
     public AddressResponseDTO create(AddressRequestDTO request) {
         Address address = new Address();
-        Customer customer = customerRepository.findById(request.customerId()).orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+        Customer customer = customerRepository.findById(request.customerId()).orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
         address.setCustomer(customer);
         address.setCity(request.city());
         address.setNumber(request.number());
@@ -64,7 +65,7 @@ public class AddressService {
     }
 
     public AddressResponseDTO listById(Long id) {
-        Address address = addressRepository.findById(id).orElseThrow(() -> new RuntimeException("Endereço não encontrado."));
+        Address address = addressRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Endereço não encontrado."));
         return new AddressResponseDTO(
                 address.getId(),
                 address.getStreet(),
@@ -79,10 +80,10 @@ public class AddressService {
 
     public AddressResponseDTO update(Long id, AddressRequestDTO request) {
         Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Endereço não encontrado."));
+                .orElseThrow(() ->new ResourceNotFoundException("Endereço não encontrado."));
 
         Customer customer = customerRepository.findById(request.customerId())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
 
         address.setStreet(request.street());
         address.setNumber(request.number());
@@ -108,7 +109,7 @@ public class AddressService {
 
     public void delete(Long id) {
         Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Endereço não encontrado"));
 
         addressRepository.delete(address);
     }

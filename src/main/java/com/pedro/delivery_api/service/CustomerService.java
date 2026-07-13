@@ -20,10 +20,10 @@ public class CustomerService {
 
     public CustomerResponseDTO create (CustomerRequestDTO request) {
         if (customerRepository.findByEmail(request.email()).isPresent()) {
-            throw new RuntimeException("E-mail já cadastrado.");
+            throw new ResourceNotFoundException("E-mail já cadastrado.");
         }
         if (customerRepository.findByPhone(request.phone()).isPresent()) {
-            throw new RuntimeException("Telefone já cadastrado.");
+            throw new ResourceNotFoundException("Telefone já cadastrado.");
         }
         Customer customer = new Customer();
         customer.setName(request.name());
@@ -50,16 +50,16 @@ public class CustomerService {
     }
 
     public CustomerResponseDTO update(Long id, CustomerRequestDTO request) {
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+        Customer customer = customerRepository.findById(id).orElseThrow(() ->new ResourceNotFoundException("Cliente não encontrado."));
         customerRepository.findByEmail(request.email())
                 .filter(c -> !c.getId().equals(id))
                 .ifPresent(c -> {
-                    throw new RuntimeException("E-mail já cadastrado.");
+                    throw new ResourceNotFoundException("E-mail já cadastrado.");
         });
         customerRepository.findByPhone(request.phone())
                 .filter(c -> !c.getId().equals(id))
                 .ifPresent(c -> {
-                    throw new RuntimeException("Telefone já cadastrado.");
+                    throw new ResourceNotFoundException("Telefone já cadastrado.");
                 });
 
         customer.setName(request.name());
@@ -72,7 +72,7 @@ public class CustomerService {
     }
 
     public void delete(Long id) {
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+        Customer customer = customerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
         customerRepository.delete(customer);
     }
 }
