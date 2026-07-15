@@ -3,6 +3,7 @@ import com.pedro.delivery_api.dto.AddressRequestDTO;
 import com.pedro.delivery_api.dto.AddressResponseDTO;
 import com.pedro.delivery_api.entity.Address;
 import com.pedro.delivery_api.entity.Customer;
+import com.pedro.delivery_api.exception.InvalidOrderException;
 import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.AddressRepository;
 import com.pedro.delivery_api.repository.CustomerRepository;
@@ -25,6 +26,11 @@ public class AddressService {
     public AddressResponseDTO create(AddressRequestDTO request) {
         Address address = new Address();
         Customer customer = customerRepository.findById(request.customerId()).orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
+
+        if (!address.getCustomer().getId().equals(customer.getId())) {
+            throw new InvalidOrderException("Endereço cadastrado diverge do dono.");
+        }
+
         address.setCustomer(customer);
         address.setCity(request.city());
         address.setNumber(request.number());

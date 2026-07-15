@@ -5,6 +5,7 @@ import com.pedro.delivery_api.dto.ProductRequestDTO;
 import com.pedro.delivery_api.dto.ProductResponseDTO;
 import com.pedro.delivery_api.entity.Category;
 import com.pedro.delivery_api.entity.Product;
+import com.pedro.delivery_api.exception.DuplicateProductException;
 import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.CategoryRepository;
 import com.pedro.delivery_api.repository.ProductRepository;
@@ -25,6 +26,10 @@ public class ProductService {
     }
 
     public ProductResponseDTO create(ProductRequestDTO request) {
+        if(productRepository.findByName(request.name()).isPresent()) {
+            throw new DuplicateProductException("Produto já existente");
+        }
+
         Product product = new Product();
         product.setName(request.name());
         product.setDescription(request.description());
@@ -72,7 +77,7 @@ public class ProductService {
     }
 
     public ProductResponseDTO listById(Long id) {
-        Product product =  productRepository.findById(id).orElseThrow(() ->new ResourceNotFoundException("Produto não encontrada."));
+        Product product =  productRepository.findById(id).orElseThrow(() ->new ResourceNotFoundException("Produto não encontrado."));
         return new ProductResponseDTO(
                 product.getId(),
                 product.getName(),

@@ -2,6 +2,9 @@ package com.pedro.delivery_api.service;
 
 import com.pedro.delivery_api.dto.*;
 import com.pedro.delivery_api.entity.*;
+import com.pedro.delivery_api.exception.InvalidOrderException;
+import com.pedro.delivery_api.exception.InvalidOrderStatusException;
+import com.pedro.delivery_api.exception.ProductUnavailableException;
 import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.*;
 import org.springframework.stereotype.Service;
@@ -32,18 +35,21 @@ public class OrderService {
         Address address = addressRepository.findById(request.addressId()).orElseThrow(() ->new ResourceNotFoundException("Endereço não identificado."));
         Customer customer = customerRepository.findById(request.customerId()).orElseThrow(() -> new ResourceNotFoundException("Cliente não identificado."));
 
-        // 1ª passada: validar disponibilidade/estoque e calcular o total, sem salvar nada ainda
+        if(request.items().isEmpty()) {
+            throw new InvalidOrderException("Items vazios para criação de pedido.");
+        }
+
         BigDecimal totalPrice = BigDecimal.ZERO;
 
         for (OrderItemRequestDTO itemRequest : request.items()) {
             Product product = productRepository.findById(itemRequest.productId()).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado."));
 
             if (!product.getAvailable()) {
-                throw new ResourceNotFoundException("Produto indisponível: " + product.getName());
+                throw new ProductUnavailableException("Produto indisponível: " + product.getName());
             }
 
             if (itemRequest.quantity() > product.getStockQuantity()) {
-                throw new ResourceNotFoundException("Produto esgotado.");
+                throw new ProductUnavailableException("Produto esgotado.");
             }
 
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(itemRequest.quantity()));
@@ -60,7 +66,6 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // 2ª passada: agora cria os OrderItem, desconta o estoque e monta a resposta
         List<OrderItemResponseDTO> itemResponse = new ArrayList<>();
 
         for (OrderItemRequestDTO itemRequest : request.items()) {
@@ -152,6 +157,37 @@ public class OrderService {
 
     public OrderResponseDTO update(Long id, OrderStatusUpdateDTO request) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado."));
+
+        switch(order.getOrderStatus()) {
+            case RECEIVED -> {}
+
+            case PREPARING -> {
+                List<OrderStatus> permitidos = List.of(OrderStatus.OUT_FOR_DELIVERY, OrderStatus.DELIVERED, OrderStatus.CANCELED);
+                if (!permitidos.contains(request.orderStatus())) {
+                    throw new InvalidOrderStatusException("Transição de status inválida.");
+                }
+            }
+
+            case OUT_FOR_DELIVERY -> {
+                List<OrderStatus> permitidos = List.of(OrderStatus.DELIVERED);
+                if (!permitidos.contains(request.orderStatus())) {
+                    throw new InvalidOrderStatusException("Transição de status inválida.");
+                }
+            }
+
+            case DELIVERED -> {
+                List<OrderStatus> permitidos = List.of(OrderStatus.CANCELED);
+                if (!permitidos.contains(request.orderStatus())) {
+                    throw new InvalidOrderStatusException("Transição de status inválida.");
+                }
+            }
+
+            case CANCELED -> {
+                throw new InvalidOrderStatusException("Transição de status inválida.");
+            }
+
+        }
+
         order.setOrderStatus(request.orderStatus());
 
         Order savedOrder = orderRepository.save(order);

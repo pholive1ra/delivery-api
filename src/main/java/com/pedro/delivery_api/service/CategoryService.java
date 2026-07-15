@@ -2,6 +2,7 @@ package com.pedro.delivery_api.service;
 import com.pedro.delivery_api.dto.CategoryRequestDTO;
 import com.pedro.delivery_api.dto.CategoryResponseDTO;
 import com.pedro.delivery_api.entity.Category;
+import com.pedro.delivery_api.exception.DuplicateCategoryException;
 import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,10 @@ public class CategoryService {
     }
 
     public CategoryResponseDTO create(CategoryRequestDTO request) {
+        if(categoryRepository.findByName(request.name()).isPresent()) {
+            throw new DuplicateCategoryException("Categoria ja existente.");
+        }
+
         Category category = new Category();
 
         category.setName(request.name());
