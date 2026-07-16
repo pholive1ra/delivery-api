@@ -5,7 +5,7 @@ import com.pedro.delivery_api.dto.ProductRequestDTO;
 import com.pedro.delivery_api.dto.ProductResponseDTO;
 import com.pedro.delivery_api.entity.Category;
 import com.pedro.delivery_api.entity.Product;
-import com.pedro.delivery_api.exception.DuplicateProductException;
+import com.pedro.delivery_api.exception.DuplicateResourceException;
 import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.CategoryRepository;
 import com.pedro.delivery_api.repository.ProductRepository;
@@ -27,7 +27,7 @@ public class ProductService {
 
     public ProductResponseDTO create(ProductRequestDTO request) {
         if(productRepository.findByName(request.name()).isPresent()) {
-            throw new DuplicateProductException("Produto já existente");
+            throw new DuplicateResourceException("Produto já existente");
         }
 
         Product product = new Product();
@@ -97,6 +97,13 @@ public class ProductService {
         Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() ->new ResourceNotFoundException("Categoria não encontrada."));
+
+        Optional<Product> existing = productRepository.findByName(request.name());
+
+        if(existing.isPresent() && !existing.get().getId().equals(id)) {
+            throw new DuplicateResourceException("Produto já existente.");
+        }
+
         product.setCategory(category);
         product.setName(request.name());
         product.setDescription(request.description());
@@ -119,7 +126,7 @@ public class ProductService {
                 savedUpdate.getCategory().getName(),
                 savedUpdate.getCategory().getActive()
         ));  // category é uma entidade (Category), mas o DTO espera um CategoryResponseDTO
-        // por isso preciso converter, montando um novo CategoryResponseDTO com os dados da entidade
+        // por isso preciso converter, montando um Novo CategoryResponseDTO com os dados da entidade
     }
 
     public void delete(Long id) {

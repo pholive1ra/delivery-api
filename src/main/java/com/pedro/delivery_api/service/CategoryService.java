@@ -2,11 +2,12 @@ package com.pedro.delivery_api.service;
 import com.pedro.delivery_api.dto.CategoryRequestDTO;
 import com.pedro.delivery_api.dto.CategoryResponseDTO;
 import com.pedro.delivery_api.entity.Category;
-import com.pedro.delivery_api.exception.DuplicateCategoryException;
+import com.pedro.delivery_api.exception.DuplicateResourceException;
 import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -19,7 +20,7 @@ public class CategoryService {
 
     public CategoryResponseDTO create(CategoryRequestDTO request) {
         if(categoryRepository.findByName(request.name()).isPresent()) {
-            throw new DuplicateCategoryException("Categoria ja existente.");
+            throw new DuplicateResourceException("Categoria ja existente.");
         }
 
         Category category = new Category();
@@ -48,6 +49,13 @@ public class CategoryService {
 
     public CategoryResponseDTO updateCategory(Long categoryId, CategoryRequestDTO request) {
         Category listCategoryById = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
+
+        Optional<Category> existing = categoryRepository.findByName(request.name());
+
+        if(existing.isPresent() && !existing.get().getId().equals(categoryId)) {
+            throw new DuplicateResourceException("Categoria já existente.");
+        }
+
             listCategoryById.setName(request.name());
 
             Category savedCategoryUpdated = categoryRepository.save(listCategoryById);

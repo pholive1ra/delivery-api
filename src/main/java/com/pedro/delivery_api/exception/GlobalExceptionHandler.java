@@ -1,6 +1,5 @@
 package com.pedro.delivery_api.exception;
 
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,7 +15,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
     }
-
 
     @ExceptionHandler(ProductUnavailableException.class)
     public ResponseEntity<Map<String, String>> handleUnavailable(ProductUnavailableException ex) {
@@ -36,15 +34,10 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(DuplicateCategoryException.class)
-    public ResponseEntity<Map<String, String>> handleDuplicateCatrgory(DuplicateCategoryException ex) {
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateCatrgory(DuplicateResourceException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(DuplicateProductException.class)
-    public ResponseEntity<Map<String, String>> handleDuplicateProduct(DuplicateProductException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", ex.getMessage()));
-    }
 }
