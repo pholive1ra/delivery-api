@@ -1,7 +1,7 @@
 package com.pedro.delivery_api.controller;
 
-import com.pedro.delivery_api.dto.ProductRequestDTO;
-import com.pedro.delivery_api.dto.ProductResponseDTO;
+import com.pedro.delivery_api.dto.request.ProductRequestDTO;
+import com.pedro.delivery_api.dto.response.ProductResponseDTO;
 import com.pedro.delivery_api.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

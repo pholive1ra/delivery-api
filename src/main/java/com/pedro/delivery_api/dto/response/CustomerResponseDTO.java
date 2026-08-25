@@ -1,4 +1,4 @@
-package com.pedro.delivery_api.dto;
+package com.pedro.delivery_api.dto.response;
 
 public record CustomerResponseDTO (
         Long id,

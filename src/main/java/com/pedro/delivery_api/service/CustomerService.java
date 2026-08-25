@@ -1,7 +1,7 @@
 package com.pedro.delivery_api.service;
 
-import com.pedro.delivery_api.dto.CustomerRequestDTO;
-import com.pedro.delivery_api.dto.CustomerResponseDTO;
+import com.pedro.delivery_api.dto.request.CustomerRequestDTO;
+import com.pedro.delivery_api.dto.response.CustomerResponseDTO;
 import com.pedro.delivery_api.entity.Customer;
 import com.pedro.delivery_api.exception.DuplicateResourceException;
 import com.pedro.delivery_api.exception.ResourceNotFoundException;
@@ -9,7 +9,6 @@ import com.pedro.delivery_api.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CustomerService {

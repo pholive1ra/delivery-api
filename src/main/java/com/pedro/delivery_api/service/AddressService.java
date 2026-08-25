@@ -1,6 +1,6 @@
 package com.pedro.delivery_api.service;
-import com.pedro.delivery_api.dto.AddressRequestDTO;
-import com.pedro.delivery_api.dto.AddressResponseDTO;
+import com.pedro.delivery_api.dto.request.AddressRequestDTO;
+import com.pedro.delivery_api.dto.response.AddressResponseDTO;
 import com.pedro.delivery_api.entity.Address;
 import com.pedro.delivery_api.entity.Customer;
 import com.pedro.delivery_api.exception.InvalidOrderException;

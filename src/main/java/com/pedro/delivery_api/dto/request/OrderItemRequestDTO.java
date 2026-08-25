@@ -1,8 +1,6 @@
-package com.pedro.delivery_api.dto;
+package com.pedro.delivery_api.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-
-import java.math.BigDecimal;
 
 public record OrderItemRequestDTO (
     @NotNull

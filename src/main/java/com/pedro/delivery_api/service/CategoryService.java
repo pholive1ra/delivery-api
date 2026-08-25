@@ -1,6 +1,6 @@
 package com.pedro.delivery_api.service;
-import com.pedro.delivery_api.dto.CategoryRequestDTO;
-import com.pedro.delivery_api.dto.CategoryResponseDTO;
+import com.pedro.delivery_api.dto.request.CategoryRequestDTO;
+import com.pedro.delivery_api.dto.response.CategoryResponseDTO;
 import com.pedro.delivery_api.entity.Category;
 import com.pedro.delivery_api.exception.DuplicateResourceException;
 import com.pedro.delivery_api.exception.ResourceNotFoundException;

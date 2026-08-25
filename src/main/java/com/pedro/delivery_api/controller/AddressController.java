@@ -1,6 +1,6 @@
 package com.pedro.delivery_api.controller;
-import com.pedro.delivery_api.dto.AddressRequestDTO;
-import com.pedro.delivery_api.dto.AddressResponseDTO;
+import com.pedro.delivery_api.dto.request.AddressRequestDTO;
+import com.pedro.delivery_api.dto.response.AddressResponseDTO;
 import com.pedro.delivery_api.service.AddressService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

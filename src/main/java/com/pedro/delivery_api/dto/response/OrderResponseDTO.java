@@ -1,4 +1,4 @@
-package com.pedro.delivery_api.dto;
+package com.pedro.delivery_api.dto.response;
 
 import com.pedro.delivery_api.entity.OrderStatus;
 
