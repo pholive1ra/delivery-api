@@ -1,13 +1,15 @@
 package com.pedro.delivery_api.controller;
 
 
-import com.pedro.delivery_api.dto.request.LoginRequest;
-import com.pedro.delivery_api.dto.request.RegisterUserRequest;
-import com.pedro.delivery_api.dto.response.LoginResponse;
-import com.pedro.delivery_api.dto.response.RegisterUserResponse;
+import com.pedro.delivery_api.dto.request.LoginRequestDTO;
+import com.pedro.delivery_api.dto.request.RegisterUserRequestDTO;
+import com.pedro.delivery_api.dto.response.LoginResponseDTO;
+import com.pedro.delivery_api.dto.response.RegisterUserResponseDTO;
+import com.pedro.delivery_api.entity.Role;
 import com.pedro.delivery_api.entity.User;
 import com.pedro.delivery_api.repository.UserRepository;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,19 +27,20 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         return null;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterUserResponse> register(@Valid @RequestBody RegisterUserRequest request) {
+    public ResponseEntity<RegisterUserResponseDTO> register(@Valid @RequestBody RegisterUserRequestDTO request) {
         User newUser = new User();
         newUser.setEmail(request.email());
-        newUser.setPassword(request.password());
+        newUser.setPassword(request.password()); //Senha terá que ser hash nao salva pura
+        newUser.setRole(Role.CUSTOMER);
         newUser.setName(request.name());
 
         userRepository.save(newUser);
 
-        return ResponseEntity.ok(new RegisterUserResponse(newUser.getEmail(), newUser.getName()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterUserResponseDTO(newUser.getEmail(), newUser.getName(), newUser.getRole()));
     }
 }
