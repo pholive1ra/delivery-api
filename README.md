@@ -8,16 +8,16 @@ The project is currently under active development and is being used to implement
 Delivery API provides the backend foundation for a delivery platform, including user registration, authentication, role-based access control, and secured endpoints.
 The security layer is designed around a stateless authentication model, where authenticated requests will use JWT tokens instead of server-side HTTP sessions.
 
-# Tech Stack
+## Tech Stack
 
-Java 21
-Spring Boot 4.1
-Spring Web MVC
-Spring Security
-Spring Data JPA
-Hibernate
-PostgreSQL
-Bean Validation
-Lombok
-Auth0 java-jwt
-Maven
+- Java 21
+- Spring Boot 4.1
+- Spring Web MVC
+- Spring Security
+- Spring Data JPA
+- Hibernate
+- PostgreSQL
+- Bean Validation
+- Lombok
+- Auth0 Java JWT
+- Maven
