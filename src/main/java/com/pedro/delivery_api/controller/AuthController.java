@@ -1,6 +1,7 @@
 package com.pedro.delivery_api.controller;
 
 
+import com.pedro.delivery_api.config.TokenConfig;
 import com.pedro.delivery_api.dto.request.LoginRequestDTO;
 import com.pedro.delivery_api.dto.request.RegisterUserRequestDTO;
 import com.pedro.delivery_api.dto.response.LoginResponseDTO;
@@ -31,11 +32,13 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final TokenConfig tokenConfig;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, TokenConfig tokenConfig) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.tokenConfig = tokenConfig;
     }
 
     @PostMapping("/login")
