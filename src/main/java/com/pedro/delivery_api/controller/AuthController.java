@@ -1,6 +1,5 @@
 package com.pedro.delivery_api.controller;
 
-
 import com.pedro.delivery_api.config.TokenConfig;
 import com.pedro.delivery_api.dto.request.LoginRequestDTO;
 import com.pedro.delivery_api.dto.request.RegisterUserRequestDTO;
@@ -8,7 +7,6 @@ import com.pedro.delivery_api.dto.response.LoginResponseDTO;
 import com.pedro.delivery_api.dto.response.RegisterUserResponseDTO;
 import com.pedro.delivery_api.entity.Role;
 import com.pedro.delivery_api.entity.User;
-import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -16,14 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -41,11 +36,14 @@ public class AuthController {
         this.tokenConfig = tokenConfig;
     }
 
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(), request.password());
         Authentication authentication = authenticationManager.authenticate(userAndPass);
-
+        User user = (User) authentication.getPrincipal();
+        String token = tokenConfig.generateToken(user);
+        return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
     @PostMapping("/register")
