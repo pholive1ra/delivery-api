@@ -1,5 +1,6 @@
 package com.pedro.delivery_api.security;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.pedro.delivery_api.config.TokenConfig;
 import com.pedro.delivery_api.entity.User;
 import com.pedro.delivery_api.repository.UserRepository;
@@ -32,14 +33,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
+        try {
             String email = tokenConfig.validateToken(token);
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
-                    user,null, user.getAuthorities()
-            );
+                            user,null, user.getAuthorities()
+                    );
             SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+        catch (JWTVerificationException exception){
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
         }
         filterChain.doFilter(request, response);
     }
