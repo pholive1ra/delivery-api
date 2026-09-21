@@ -35,9 +35,13 @@ public class OrderService {
         this.orderItemRepository = orderItemRepository;
     }
 
-    public OrderResponseDTO create(OrderRequestDTO request) {
+    public OrderResponseDTO create(OrderRequestDTO request, User user) {
         Address address = addressRepository.findById(request.addressId()).orElseThrow(() ->new ResourceNotFoundException("Endereço não identificado."));
-        Customer customer = customerRepository.findById(request.customerId()).orElseThrow(() -> new ResourceNotFoundException("Cliente não identificado."));
+        Customer customer = customerRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ResourceNotFoundException("Cliente não identificado."));
+        if(!address.getCustomer().getId().equals(customer.getId())) {
+            throw new InvalidOrderException("Esse endereço não pertence ao cliente autenticado");
+        }
+
 
         if(request.items().isEmpty()) {
             throw new InvalidOrderException("Items vazios para criação de pedido.");
@@ -118,6 +122,37 @@ public class OrderService {
                         item.getProduct().getName(),
                         item.getQuantity(),
                         item.getUnitPrice()
+                ));
+            }
+
+            ordersResponse.add(new OrderResponseDTO(
+                    order.getId(),
+                    order.getCustomer().getId(),
+                    order.getAddress().getId(),
+                    itemResponse,
+                    order.getTotalPrice(),
+                    order.getOrderStatus(),
+                    order.getCreatedAt()
+            ));
+        }
+        return ordersResponse;
+    }
+
+    public List<OrderResponseDTO> listMyOrders(User user) {
+        Customer customer = customerRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ResourceNotFoundException("Cliente não identificado."));
+        List<Order> myListOrder = orderRepository.findByCustomerId(customer.getId());
+        List<OrderResponseDTO> ordersResponse = new ArrayList<>();
+
+        for (Order order : myListOrder) {
+            List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
+
+            List<OrderItemResponseDTO> itemResponse = new ArrayList<>();
+            for(OrderItem item : items) {
+                itemResponse.add(new OrderItemResponseDTO(
+                   item.getProduct().getId(),
+                   item.getProduct().getName(),
+                   item.getQuantity(),
+                   item.getUnitPrice()
                 ));
             }
 

@@ -66,7 +66,37 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/orders/{id}")
                         .hasRole(Role.ADMIN.name())
 
-                        .anyRequest().authenticated()) //Atenção: Qualquer endpoint que esquecer de configurar acima será acessível por qualquer usuário autenticado, independente de ser ADMIN ou CUSTOMER!!!
+                        .requestMatchers(HttpMethod.DELETE, "/orders/{id}")
+                        .hasRole(Role.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.PUT, "/orders/{id}")
+                        .hasRole(Role.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.GET, "/products", "/products/{id}")
+                        .hasAnyRole(Role.CUSTOMER.name(), Role.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.POST, "/products")
+                        .hasRole(Role.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.PUT, "/products/{id}")
+                        .hasRole(Role.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.DELETE, "/products/{id}")
+                        .hasRole(Role.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.GET, "/addresses", "/addresses/{id}")
+                        .hasRole(Role.CUSTOMER.name())
+
+                        .requestMatchers(HttpMethod.POST, "/addresses")
+                        .hasRole(Role.CUSTOMER.name())
+
+                        .requestMatchers(HttpMethod.PUT, "/addresses/{id}")
+                        .hasRole(Role.CUSTOMER.name())
+
+                        .requestMatchers(HttpMethod.DELETE, "/addresses/{id}")
+                        .hasRole(Role.CUSTOMER.name())
+
+                        .anyRequest().denyAll()) //Atenção: “A rota que não tiver configurada acima, não tem como acessar. (.authenticated -> permite)”
                         .build();
         }
 

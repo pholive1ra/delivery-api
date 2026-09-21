@@ -1,8 +1,10 @@
 package com.pedro.delivery_api.service;
+
 import com.pedro.delivery_api.dto.request.AddressRequestDTO;
 import com.pedro.delivery_api.dto.response.AddressResponseDTO;
 import com.pedro.delivery_api.entity.Address;
 import com.pedro.delivery_api.entity.Customer;
+import com.pedro.delivery_api.entity.User;
 import com.pedro.delivery_api.exception.InvalidOrderException;
 import com.pedro.delivery_api.exception.ResourceNotFoundException;
 import com.pedro.delivery_api.repository.AddressRepository;
@@ -18,18 +20,22 @@ public class AddressService {
     private final AddressRepository addressRepository;
     private final CustomerRepository customerRepository;
 
-    public AddressService(AddressRepository addressRepository, CustomerRepository customerRepository) {
+    public AddressService(
+            AddressRepository addressRepository,
+            CustomerRepository customerRepository
+    ) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
     }
 
-    public AddressResponseDTO create(AddressRequestDTO request) {
-        Address address = new Address();
-        Customer customer = customerRepository.findById(request.customerId()).orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
+    public AddressResponseDTO create(AddressRequestDTO request, User user) {
 
-        if (!address.getCustomer().getId().equals(customer.getId())) {
-            throw new InvalidOrderException("Endereço cadastrado diverge do dono.");
-        }
+        Customer customer = customerRepository
+                .findByEmail(user.getEmail())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Cliente não encontrado."));
+
+        Address address = new Address();
 
         address.setCustomer(customer);
         address.setCity(request.city());
@@ -53,8 +59,15 @@ public class AddressService {
         );
     }
 
-    public List<AddressResponseDTO> list() {
-        List<Address> listAddress = addressRepository.findAll();
+    public List<AddressResponseDTO> list(User user) {
+
+        Customer customer = customerRepository
+                .findByEmail(user.getEmail())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Cliente não encontrado."));
+
+        List<Address> listAddress =
+                addressRepository.findByCustomerId(customer.getId());
 
         return listAddress.stream()
                 .map(address -> new AddressResponseDTO(
@@ -70,8 +83,24 @@ public class AddressService {
                 .collect(Collectors.toList());
     }
 
-    public AddressResponseDTO listById(Long id) {
-        Address address = addressRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Endereço não encontrado."));
+    public AddressResponseDTO listById(Long id, User user) {
+
+        Customer customer = customerRepository
+                .findByEmail(user.getEmail())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Cliente não encontrado."));
+
+        Address address = addressRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Endereço não encontrado."));
+
+        if (!address.getCustomer().getId().equals(customer.getId())) {
+            throw new InvalidOrderException(
+                    "Esse endereço não pertence ao cliente autenticado."
+            );
+        }
+
         return new AddressResponseDTO(
                 address.getId(),
                 address.getStreet(),
@@ -84,12 +113,27 @@ public class AddressService {
         );
     }
 
-    public AddressResponseDTO update(Long id, AddressRequestDTO request) {
-        Address address = addressRepository.findById(id)
-                .orElseThrow(() ->new ResourceNotFoundException("Endereço não encontrado."));
+    public AddressResponseDTO update(
+            Long id,
+            AddressRequestDTO request,
+            User user
+    ) {
 
-        Customer customer = customerRepository.findById(request.customerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
+        Customer customer = customerRepository
+                .findByEmail(user.getEmail())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Cliente não encontrado."));
+
+        Address address = addressRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Endereço não encontrado."));
+
+        if (!address.getCustomer().getId().equals(customer.getId())) {
+            throw new InvalidOrderException(
+                    "Esse endereço não pertence ao cliente autenticado."
+            );
+        }
 
         address.setStreet(request.street());
         address.setNumber(request.number());
@@ -97,25 +141,38 @@ public class AddressService {
         address.setNeighborhood(request.neighborhood());
         address.setCity(request.city());
         address.setZipCode(request.zipCode());
-        address.setCustomer(customer);
 
-        address = addressRepository.save(address);
+        Address savedAddress = addressRepository.save(address);
 
         return new AddressResponseDTO(
-                address.getId(),
-                address.getStreet(),
-                address.getNumber(),
-                address.getComplement(),
-                address.getNeighborhood(),
-                address.getCity(),
-                address.getZipCode(),
-                address.getCustomer().getId()
+                savedAddress.getId(),
+                savedAddress.getStreet(),
+                savedAddress.getNumber(),
+                savedAddress.getComplement(),
+                savedAddress.getNeighborhood(),
+                savedAddress.getCity(),
+                savedAddress.getZipCode(),
+                savedAddress.getCustomer().getId()
         );
     }
 
-    public void delete(Long id) {
-        Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Endereço não encontrado"));
+    public void delete(Long id, User user) {
+
+        Customer customer = customerRepository
+                .findByEmail(user.getEmail())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Cliente não encontrado."));
+
+        Address address = addressRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Endereço não encontrado."));
+
+        if (!address.getCustomer().getId().equals(customer.getId())) {
+            throw new InvalidOrderException(
+                    "Esse endereço não pertence ao cliente autenticado."
+            );
+        }
 
         addressRepository.delete(address);
     }
