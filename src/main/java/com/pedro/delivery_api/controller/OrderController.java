@@ -4,8 +4,10 @@ package com.pedro.delivery_api.controller;
 import com.pedro.delivery_api.dto.request.OrderRequestDTO;
 import com.pedro.delivery_api.dto.response.OrderResponseDTO;
 import com.pedro.delivery_api.dto.request.OrderStatusUpdateDTO;
+import com.pedro.delivery_api.entity.User;
 import com.pedro.delivery_api.service.OrderService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +22,16 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @PostMapping("")
-    public OrderResponseDTO create (@RequestBody OrderRequestDTO request) {
-        return orderService.create(request);
+    @PostMapping
+    public OrderResponseDTO create (@RequestBody OrderRequestDTO request, @AuthenticationPrincipal User user) {
+        return orderService.create(request, user);
     }
+
+    @GetMapping("/me")
+    public List<OrderResponseDTO> listMyOrders(@AuthenticationPrincipal User user) {
+        return orderService.listMyOrders(user);
+    }
+
 
     @GetMapping("")
     public List<OrderResponseDTO> list() {

@@ -6,8 +6,6 @@ import java.util.List;
 
 public record OrderRequestDTO (
         @NotNull
-        Long customerId,
-        @NotNull
         Long addressId,
         @NotNull
         List<OrderItemRequestDTO> items
